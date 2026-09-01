@@ -19,3 +19,14 @@ Mock SaaS admin platform: customers, subscriptions, invoices, teams.
 | POST /invoices/{id}/refund | issue refund | high_risk_write |
 | POST /invoices/{id}/refund/reverse | reverse refund (compensating action) | critical_write |
 | DELETE /customers/{id} | delete customer | critical_write |
+
+## 2. Roles
+
+| Role | Can request |
+|---|---|
+| viewer | read_only |
+| agent | read_only, low_risk_write |
+| approver | read_only, low_risk_write, high_risk_write (+ can approve others' high_risk_write requests) |
+| admin | read_only, low_risk_write, high_risk_write, critical_write |
+
+Note: `agent` can *request* high_risk_write actions but cannot self-approve — these route to the approval queue.
