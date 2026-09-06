@@ -13,8 +13,14 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 PLAN_JSON_SCHEMA = {
     "type": "object",
     "properties": {
-        "endpoint": {"type": "string"},
-        "method": {"type": "string"},
+        "endpoint": {
+            "type": "string",
+            "description": "The URL path only, e.g. '/subscriptions/{subscription_id}/cancel'. Do NOT include the HTTP method here."
+        },
+        "method": {
+            "type": "string",
+            "description": "The HTTP method only, e.g. 'POST'. Must be one of GET, POST, PATCH, DELETE."
+        },
         "parameters": {
             "type": "array",
             "items": {
@@ -67,7 +73,12 @@ def create_plan(request: str, candidates: list[Endpoint], requested_by: str) -> 
     )
     raw = json.loads(response.text)
     raw["parameters"] = {p["name"]: p["value"] for p in raw["parameters"]}
-
+    # defensive normalization: strip a leading HTTP method if the model
+    # merged it into the endpoint field despite the schema
+    for m in ("GET", "POST", "PATCH", "DELETE", "PUT"):
+        if raw["endpoint"].startswith(m + " "):
+            raw["endpoint"] = raw["endpoint"][len(m) + 1:]
+            break
     matched = next(
         (c for c in candidates if c.path == raw["endpoint"] and c.method == raw["method"]),
         None,
