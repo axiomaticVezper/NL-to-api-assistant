@@ -1,30 +1,46 @@
-# Handoff — Track B, Phase 1 (in progress)
+# Handoff — Track B, Phase 1 (complete)
 
 **From:** Track B
-**Status:** In progress
+**Status:** Complete, tested manually against live Track A API
 
-## Contract fix
-Resolved the role-permission ambiguity you flagged — `docs/PHASE0_CONTRACT.md`
-now explicitly lists `agent` as allowed `high_risk_write` (cannot self-approve).
-Your RBAC implementation was correct as built, no code change needed on your end.
+## Setup
+```powershell
+pip install -r app_brain/requirements.txt
+```
+Requires `GEMINI_API_KEY` in a local `.env` (gitignored, not committed — get your own key at
+https://aistudio.google.com/apikey).
 
-## What's live on Track B
-- `stubs/risk_tiers.json` — Track B-owned mapping of `METHOD /path` → risk tier,
-  since the live OpenAPI schema has no risk-tier info in it. This is joined
-  against your `openapi.json` at parse time (see `app_brain/schema_parser.py`).
-  If you'd rather expose `x-risk-tier` as an OpenAPI extension on your routes
-  later, I can drop this file and switch sources — no changes needed elsewhere
-  in my pipeline either way.
-- `app_brain/schema_parser.py` — parses your live schema + the risk tier
-  mapping into typed `Endpoint` objects. Confirmed all 13 business endpoints
-  resolve correctly against your running server.
+## What's live
+- `app_brain/schema_parser.py` — parses OpenAPI schema + risk tier mapping into typed `Endpoint` objects
+- `app_brain/retriever.py` — keyword-overlap candidate endpoint selection (naive — will need
+  upgrading to embeddings once we have 30+ endpoints; fine for now)
+- `app_brain/planner.py` — Gemini-based LLM planner producing validated `Plan` objects
+  - Uses `gemini-flash-latest` (self-updating alias, avoids future model deprecations)
+  - Known Gemini structured-output quirk: schema-less "object" params always return `{}` —
+    worked around by using list[{name, value}] and converting to dict after parsing
+  - Also normalizes cases where the model merges HTTP method into the endpoint string
+- `app_brain/validator.py` — validates a Plan's endpoint/params/risk_tier against ground
+  truth from the schema before it would be sent to your API
 
-## What I needed from your API to get this far
-- Ran your server locally via `uvicorn app.main:app --reload` after adding
-  a missing `app/requirements.txt` (wasn't committed — worth adding
-  `pip freeze > app/requirements.txt` as a habit alongside code commits).
-- Fetched `http://127.0.0.1:8000/openapi.json` to build the parser against
-  your real schema instead of the earlier hand-written stub.
+## Try it yourself
+With your server running (`uvicorn app.main:app --reload`):
+```powershell
+python -m app_brain.validator
+```
+This runs schema parsing → retrieval → planning → validation end to end on a sample request
+and prints the resulting `Plan`.
 
-## Next on Track B
-Candidate-endpoint retrieval / selection logic, then the LLM planning step.
+## Depends on
+- `stubs/risk_tiers.json` — my own mapping of endpoint → risk tier, since your OpenAPI schema
+  has no risk-tier info in it. If you'd rather add `x-risk-tier` as an OpenAPI extension on
+  your routes, I can drop this file and switch sources with no changes anywhere else in my code.
+- `openapi_live.json` — not committed; regenerate locally by hitting
+  `http://127.0.0.1:8000/openapi.json` while your server runs.
+
+## Known limitations (Phase 2+ work)
+- Only tested against single-step requests so far — no multi-step workflow chaining yet
+- No retry logic around Gemini calls (transient 503s happen on the free tier)
+- Retriever is keyword-based, not semantic — fine for 13 endpoints, will need revisiting later
+
+## Next on Track B (Phase 2)
+Approval workflow integration, dry-run mode, multi-step workflow orchestration
