@@ -25,7 +25,7 @@ Mock SaaS admin platform: customers, subscriptions, invoices, teams.
 | Role | Can request |
 |---|---|
 | viewer | read_only |
-| agent | read_only, low_risk_write |
+| agent | read_only, low_risk_write, high_risk_write (cannot self-approve — routes to approval queue) |
 | approver | read_only, low_risk_write, high_risk_write (+ can approve others' high_risk_write requests) |
 | admin | read_only, low_risk_write, high_risk_write, critical_write |
 
