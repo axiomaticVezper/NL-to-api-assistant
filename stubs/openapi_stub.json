@@ -1,0 +1,34 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Mock SaaS Admin API (stub)", "version": "0.1.0" },
+  "paths": {
+    "/customers/{id}": {
+      "get": {
+        "summary": "Get customer by ID",
+        "x-risk-tier": "read_only",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ]
+      }
+    },
+    "/subscriptions/{id}/cancel": {
+      "post": {
+        "summary": "Cancel a subscription",
+        "x-risk-tier": "high_risk_write",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ]
+      }
+    },
+    "/invoices/{id}/refund": {
+      "post": {
+        "summary": "Issue a refund",
+        "x-risk-tier": "high_risk_write",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "amount", "in": "query", "required": true, "schema": { "type": "number" } }
+        ]
+      }
+    }
+  }
+}
