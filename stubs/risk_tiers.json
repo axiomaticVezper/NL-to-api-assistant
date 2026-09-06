@@ -1,0 +1,15 @@
+{
+  "GET /customers/search": "read_only",
+  "GET /customers/{customer_id}": "read_only",
+  "DELETE /customers/{customer_id}": "critical_write",
+  "GET /subscriptions/{customer_id}": "read_only",
+  "PATCH /subscriptions/{subscription_id}/plan": "low_risk_write",
+  "POST /subscriptions/{subscription_id}/cancel": "high_risk_write",
+  "GET /invoices/{customer_id}": "read_only",
+  "POST /invoices/{invoice_id}/refund": "high_risk_write",
+  "POST /invoices/{invoice_id}/refund/reverse": "critical_write",
+  "GET /teams/{team_id}/members": "read_only",
+  "POST /teams/{team_id}/members": "low_risk_write",
+  "DELETE /teams/{team_id}/members/{user_id}": "low_risk_write",
+  "POST /tickets": "low_risk_write"
+}
