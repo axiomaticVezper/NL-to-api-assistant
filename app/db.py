@@ -40,6 +40,18 @@ CREATE TABLE IF NOT EXISTS plans (
     created_at      TEXT NOT NULL,
     decided_at      TEXT
 );
+
+
+CREATE TABLE IF NOT EXISTS idempotency_keys (
+    actor         TEXT NOT NULL,
+    key           TEXT NOT NULL,
+    fingerprint   TEXT NOT NULL,
+    status_code   INTEGER,
+    response_body BLOB,
+    content_type  TEXT,
+    created_at    TEXT NOT NULL,
+    PRIMARY KEY (actor, key)
+);
 """
 
 
