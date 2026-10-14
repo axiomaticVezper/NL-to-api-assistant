@@ -70,3 +70,14 @@ def set_decision(plan_id: str, new_status: str, decided_by: str, note: str) -> b
             (new_status, decided_by, note, datetime.now(timezone.utc).isoformat(), plan_id),
         )
         return cur.rowcount == 1
+
+
+
+def claim_for_execution(plan_id: str) -> bool:
+    """approved -> executed, atomically. Returns False if it was not 'approved'."""
+    with get_conn() as conn:
+        cur = conn.execute(
+            "UPDATE plans SET status = 'executed' WHERE plan_id = ? AND status = 'approved'",
+            (plan_id,),
+        )
+        return cur.rowcount == 1

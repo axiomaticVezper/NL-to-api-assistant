@@ -12,11 +12,13 @@ independence is the whole point of "governed": the planner can be
 wrong, buggy, or compromised, and this layer still holds the line.
 """
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.auth.jwt_handler import decode_access_token
 from contracts.plan import RiskTier
+
+from app import gate, policy
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -48,7 +50,7 @@ def require_risk_tier(tier: RiskTier):
     Returns a FastAPI dependency that enforces a specific risk tier.
     Usage on a route: Depends(require_risk_tier(RiskTier.high_risk_write))
     """
-    def _check(user: dict = Depends(get_current_user)) -> dict:
+    def _check(request: Request, user: dict = Depends(get_current_user)) -> dict:
         role = user.get("role")
         allowed = ROLE_ALLOWED_TIERS.get(role, set())
         if tier not in allowed:
@@ -56,6 +58,8 @@ def require_risk_tier(tier: RiskTier):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Role '{role}' is not permitted to perform '{tier.value}' actions",
             )
+        if policy.requires_approval(tier):
+            gate.enforce_approved_plan(request, user, tier)
         return user
     return _check
 
