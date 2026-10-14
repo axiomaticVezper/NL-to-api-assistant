@@ -58,3 +58,20 @@ def require_risk_tier(tier: RiskTier):
             )
         return user
     return _check
+
+
+
+def require_roles(*roles: str):
+    """
+    Role-based gate for endpoints that are about *who you are* rather than
+    *how risky an action is* (e.g. reading the audit log, approving plans).
+    Usage: Depends(require_roles("approver", "admin"))
+    """
+    def _check(user: dict = Depends(get_current_user)) -> dict:
+        if user.get("role") not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Role '{user.get('role')}' cannot access this resource",
+            )
+        return user
+    return _check
