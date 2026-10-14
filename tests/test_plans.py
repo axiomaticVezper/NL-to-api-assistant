@@ -91,6 +91,7 @@ def test_only_requester_or_approver_can_view_plan(client, as_user):
 GOVERNED_EXCLUDED = {
     "/auth/login", "/health", "/audit", "/plans", "/plans/{plan_id}",
     "/approvals", "/approvals/{plan_id}/approve", "/approvals/{plan_id}/reject",
+"/compensations"
 }
 
 
