@@ -39,3 +39,34 @@ def get_plan(plan_id: str) -> dict | None:
     data["parameters"] = json.loads(data["parameters"])
     data["requires_approval"] = bool(data["requires_approval"])
     return data
+
+
+
+def list_plans(status: str | None = None) -> list[dict]:
+    query, params = "SELECT * FROM plans", ()
+    if status is not None:
+        query, params = query + " WHERE status = ?", (status,)
+    with get_conn() as conn:
+        rows = conn.execute(query + " ORDER BY created_at ASC", params).fetchall()
+    result = []
+    for row in rows:
+        data = dict(row)
+        data["parameters"] = json.loads(data["parameters"])
+        data["requires_approval"] = bool(data["requires_approval"])
+        result.append(data)
+    return result
+
+
+def set_decision(plan_id: str, new_status: str, decided_by: str, note: str) -> bool:
+    """
+    Move a plan out of pending_approval. The WHERE clause makes this atomic:
+    if two approvers click at the same moment, only one UPDATE matches a
+    still-pending row, so a plan can never be decided twice.
+    """
+    with get_conn() as conn:
+        cur = conn.execute(
+            "UPDATE plans SET status = ?, decided_by = ?, decision_note = ?, decided_at = ? "
+            "WHERE plan_id = ? AND status = 'pending_approval'",
+            (new_status, decided_by, note, datetime.now(timezone.utc).isoformat(), plan_id),
+        )
+        return cur.rowcount == 1

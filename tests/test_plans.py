@@ -88,7 +88,10 @@ def test_only_requester_or_approver_can_view_plan(client, as_user):
     assert client.get(f"/plans/{plan_id}", headers=as_user("carol_approver")).status_code == 200
 
 
-GOVERNED_EXCLUDED = {"/auth/login", "/health", "/audit", "/plans", "/plans/{plan_id}"}
+GOVERNED_EXCLUDED = {
+    "/auth/login", "/health", "/audit", "/plans", "/plans/{plan_id}",
+    "/approvals", "/approvals/{plan_id}/approve", "/approvals/{plan_id}/reject",
+}
 
 
 def test_policy_lists_exactly_the_governed_endpoints():

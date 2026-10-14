@@ -35,6 +35,11 @@ USERS = {
         "hashed_password": _HASHED_PASSWORD,
         "role": "admin",
     },
+    "erin_admin": {
+        "username": "erin_admin",
+        "hashed_password": _HASHED_PASSWORD,
+        "role": "admin",
+    },
 }
 
 

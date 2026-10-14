@@ -34,3 +34,15 @@ def tier_for(method: str, endpoint: str) -> RiskTier | None:
 
 def requires_approval(tier: RiskTier) -> bool:
     return tier in APPROVAL_REQUIRED_TIERS
+
+
+
+# Who may approve/reject plans of each tier. Critical actions need an admin.
+DECIDERS: dict[RiskTier, set[str]] = {
+    RiskTier.high_risk_write: {"approver", "admin"},
+    RiskTier.critical_write: {"admin"},
+}
+
+
+def can_decide(role: str, tier: RiskTier) -> bool:
+    return role in DECIDERS.get(tier, set())
