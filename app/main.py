@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from app.auth.users import get_user, verify_password
 from app.auth.jwt_handler import create_access_token
-from app.routes import customers, subscriptions, invoices, teams, tickets, audit
+from app.routes import customers, subscriptions, invoices, teams, tickets, audit, plans
 
 app = FastAPI(title="NL-to-API Assistant — Mock API (Phase 1, Track A)")
 
@@ -38,3 +38,4 @@ app.include_router(invoices.router)
 app.include_router(teams.router)
 app.include_router(tickets.router)
 app.include_router(audit.router)
+app.include_router(plans.router)

@@ -23,6 +23,23 @@ CREATE TABLE IF NOT EXISTS audit_events (
     timestamp   TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_audit_plan ON audit_events(plan_id);
+
+CREATE TABLE IF NOT EXISTS plans (
+    plan_id         TEXT PRIMARY KEY,
+    endpoint        TEXT NOT NULL,
+    method          TEXT NOT NULL,
+    parameters      TEXT NOT NULL,
+    reason          TEXT NOT NULL,
+    expected_result TEXT NOT NULL,
+    risk_tier       TEXT NOT NULL,
+    requires_approval INTEGER NOT NULL,
+    requested_by    TEXT NOT NULL,
+    status          TEXT NOT NULL,
+    decided_by      TEXT,
+    decision_note   TEXT,
+    created_at      TEXT NOT NULL,
+    decided_at      TEXT
+);
 """
 
 
